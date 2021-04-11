@@ -1,113 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'src/qr.dart';
+import 'src/db.dart';
+import 'src/entry.dart';
 
-void main() {
-  runApp(MyApp());
+var db = DatabaseProvider();
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await db.open();
+  List<Entry> entries = await getData();
+  runApp(Home(entries: entries));
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class Home extends StatefulWidget {
+  final List<Entry> entries;
+  Home({Key? key, required this.entries}) : super(key: key);
+  @override
+  _HomeState createState() => _HomeState(entries);
+}
+
+
+class _HomeState extends State {
+  List<Entry> entries;
+  _HomeState(this.entries);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+      home: Scaffold(
+      appBar: AppBar(
+        /*leading: IconButton(
+          icon: Icon(Icons.menu),
+          tooltip: 'Navigation menu',
+          onPressed: null,
+        ),*/
+        title: Text("HistoryKiroku"),
+        /*actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.search),
+            tooltip: 'Search',
+            onPressed: null,
+          ),
+        ],*/
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      body: ListView.builder(
+        itemCount: entries.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text('id:${entries[index].id}  Classroom:${entries[index].classroom}  Seat:${entries[index].seat} Period: ${entries[index].period}'),
+          );
+        },
+      ),
+
+      floatingActionButton: Builder(
+          builder: (context) => PopupMenuButton<String>(
+        tooltip: 'Add',
+        child: Icon(Icons.add_circle_outline_outlined),
+        itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+          PopupMenuItem<String>(
+            value: 'QRScan', child: Text('Scan QR code'),
+          ),
+
+          PopupMenuItem<String>(
+              value: 'EnterManually', child: Text('Enter manually')),
+        ],
+        onSelected: (index) {
+          _navigate(index, context);
+        },
+      ))
+    ),
     );
   }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
+  _navigate(String index, BuildContext context) {
+    if (index == 'QRScan') {
+      _scanQRCode(context);
+    }
+    else {
+      _navigateToNewEntry(context, generateNewEntry(''));
+    }
+  }
+  _navigateToNewEntry(BuildContext context, Entry newEntry) async {
+    newEntry = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) =>
+            NewEntryScreen(newEntry: newEntry))
+    );
+    await db.insert(newEntry);
+    entries = await db.getEntries();
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      entries = entries;
     });
   }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+  _scanQRCode(BuildContext context) async{
+    var newEntry = await Navigator.push(
+      context,
+      // Create the SelectionScreen in the next step.
+      MaterialPageRoute(builder: (context) => QRScanScreen()),
     );
+    if (newEntry != null) {
+      _navigateToNewEntry(context, newEntry);
+    }
   }
+}
+
+getData() async {
+  List<Entry> entries = await db.getEntries();
+  return entries;
 }
