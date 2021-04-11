@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'src/qr.dart';
 import 'src/db.dart';
 import 'src/entry.dart';
+import 'package:intl/intl.dart';
 
 var db = DatabaseProvider();
+final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
+final DateFormat hourminuteFormatter = DateFormat('HH:mm');
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await db.open();
   List<Entry> entries = await getData();
   runApp(Home(entries: entries));
@@ -26,61 +30,70 @@ class _HomeState extends State {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-          appBar: AppBar(
-            /*leading: IconButton(
+        home: Scaffold(
+            appBar: AppBar(
+              /*leading: IconButton(
           icon: Icon(Icons.menu),
           tooltip: 'Navigation menu',
           onPressed: null,
         ),*/
-            title: Text("HistoryKiroku"),
-            /*actions: <Widget>[
+              title: Text("HistoryKiroku"),
+              /*actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
             tooltip: 'Search',
             onPressed: null,
           ),
         ],*/
-          ),
-          body: ListView.builder(
-            itemCount: entries.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(
-                    'id:${entries[index].id}  Classroom:${entries[index].classroom}  Seat:${entries[index].seat} Period: ${entries[index].period} Time: ${DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart*1000).toString()}'),
-              );
-            },
-          ),
-          floatingActionButton: Builder (builder: (context) =>FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: () {_navigateToNewEntry(context, generateNewEntry(''));} ,
-            ))
-          /*Builder(
-              builder: (context) => PopupMenuButton<String>(
-                    tooltip: 'Add',
-                    child: Icon(Icons.add_circle_outline_outlined),
-                    itemBuilder: (BuildContext context) =>
-                        <PopupMenuItem<String>>[
-                      PopupMenuItem<String>(
-                        value: 'QRScan',
-                        child: Text('Scan QR code'),
-                      ),
-                      PopupMenuItem<String>(
-                          value: 'EnterManually',
-                          child: Text('Enter manually')),
-                    ],
-                    onSelected: (index) {
-                      _navigate(index, context);
+            ),
+            body: ListView.builder(
+              itemCount: entries.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                    title: Text('${entries[index].classroom}-${entries[index].seat} Period: ${entries[index].period}\n' +
+                        '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' +
+                        '${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}'),
+                    onTap: () {
+                      _navigateToEditEntry(context, entries[index]);
                     },
-                  ))),*/
-    ));
+                    trailing: Text('id:${entries[index].id}'));
+              },
+            ),
+            floatingActionButton: Builder(
+                builder: (context) => FloatingActionButton(
+                      child: Icon(Icons.add),
+                      onPressed: () {
+                        _navigateToNewEntry(context, generateNewEntry(''));
+                      },
+                    ))));
+  }
+
+  _navigateToEditEntry(BuildContext context, Entry entry) async {
+    var returnedEntry = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NewEntryScreen(
+                  newEntry: entry,
+                  isEdit: true,
+                )));
+    if (returnedEntry != null) {
+      entry = returnedEntry;
+    }
+    await db.update(entry);
+    entries = await db.getEntries();
+    setState(() {
+      entries = entries;
+    });
   }
 
   _navigateToNewEntry(BuildContext context, Entry newEntry) async {
     var returnedEntry = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => NewEntryScreen(newEntry: newEntry)));
+            builder: (context) => NewEntryScreen(
+                  newEntry: newEntry,
+                  isEdit: false,
+                )));
     if (returnedEntry != null) {
       newEntry = returnedEntry;
     }
@@ -91,6 +104,7 @@ class _HomeState extends State {
     });
   }
 }
+
 getData() async {
   List<Entry> entries = await db.getEntries();
   return entries;

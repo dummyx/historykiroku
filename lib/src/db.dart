@@ -117,7 +117,7 @@ create table 'entries' (
     for (var record in records) {
       entries.add(getEntryFromRecord(record));
     }
-    return entries;
+    return entries.reversed.toList();
   }
 
   Future<String> localFile() async {
@@ -156,15 +156,15 @@ create table 'entries' (
 }
 
 Map<String, String> parseScannedData(scannedData) {
-  var classroom = '';
-  var seat = '';
+  var classroom;
+  var seat;
   try {
     var data = scannedData.split('/')[1].split('-');
     classroom = data[0];
     seat = data[1];
-  }
-  catch (e) {
-
+  } catch (e) {
+    classroom = '';
+    seat = '';
   }
   return ({'classroom': classroom, 'seat': seat});
 }

@@ -5,27 +5,43 @@ import 'qr.dart';
 
 class NewEntryScreen extends StatefulWidget {
   final Entry newEntry;
-  NewEntryScreen({Key? key, required this.newEntry}) : super(key: key);
+  final bool isEdit;
+  NewEntryScreen({Key? key, required this.newEntry, required this.isEdit})
+      : super(key: key);
   @override
-  _NewEntryScreenState createState() => _NewEntryScreenState(newEntry);
+  _NewEntryScreenState createState() => _NewEntryScreenState(newEntry, isEdit);
 }
 
 class _NewEntryScreenState extends State<NewEntryScreen> {
   final _formKey = GlobalKey<FormState>();
   Entry newEntry;
-  _NewEntryScreenState(this.newEntry);
+  bool isEdit;
+  _NewEntryScreenState(this.newEntry, this.isEdit);
   final classroomTextController = TextEditingController();
   final seatTextController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    classroomTextController.text = newEntry.classroom;
+    seatTextController.text = newEntry.seat;
+    if (isEdit) {
+      newEntry.timestampEnd = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('New entry'),
+        title: Text(isEdit ? 'Edit entry' : 'New entry'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.camera_alt),
             tooltip: 'Scan QR code',
-            onPressed: () {_scanQRCode(context);},
+            onPressed: () {
+              _scanQRCode(context);
+            },
           ),
         ],
       ),
@@ -43,15 +59,20 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
               children: [
                 ...[
                   DateTimePicker(
-                    initialValue: DateTime.fromMillisecondsSinceEpoch(newEntry.timestampStart*1000).toString(),
+                    initialValue: DateTime.fromMillisecondsSinceEpoch(
+                            newEntry.timestampStart * 1000)
+                        .toString(),
                     firstDate: DateTime(2019),
                     lastDate: DateTime(2100),
                     type: DateTimePickerType.dateTimeSeparate,
                     dateLabelText: 'Date',
                     timeLabelText: 'Time',
-                    onChanged: (datetime) {newEntry.timestampStart = DateTime.parse(datetime).millisecondsSinceEpoch~/1000;},
-                    ),
-                  
+                    onChanged: (datetime) {
+                      newEntry.timestampStart =
+                          DateTime.parse(datetime).millisecondsSinceEpoch ~/
+                              1000;
+                    },
+                  ),
                   TextFormField(
                     controller: classroomTextController,
                     onChanged: (text) {
@@ -96,7 +117,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                           child: Text(value),
                         );
                       }).toList(),
-                    )
+                    ),
                   ])
                 ].expand(
                   (widget) => [
@@ -105,6 +126,20 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                       height: 24,
                     )
                   ],
+                ),
+                DateTimePicker(
+                  initialValue: DateTime.fromMillisecondsSinceEpoch(
+                          newEntry.timestampEnd * 1000)
+                      .toString(),
+                  firstDate: DateTime(2019),
+                  lastDate: DateTime(2100),
+                  type: DateTimePickerType.dateTimeSeparate,
+                  dateLabelText: 'Date',
+                  timeLabelText: 'Time',
+                  onChanged: (datetime) {
+                    newEntry.timestampEnd =
+                        DateTime.parse(datetime).millisecondsSinceEpoch ~/ 1000;
+                  },
                 )
               ],
             ),
@@ -121,14 +156,12 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
   _scanQRCode(BuildContext context) async {
     var scannedData = await Navigator.push(
       context,
-      // Create the SelectionScreen in the next step.
       MaterialPageRoute(builder: (context) => QRScanScreen()),
     );
     var parsedData = parseScannedData(scannedData);
 
-      classroomTextController.text = parsedData['classroom']!;
-      seatTextController.text = parsedData['seat']!;
-
+    classroomTextController.text = parsedData['classroom']!;
+    seatTextController.text = parsedData['seat']!;
   }
 
   @override
