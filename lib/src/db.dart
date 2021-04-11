@@ -44,12 +44,11 @@ Entry generateNewEntry(String scannedData) {
   var now = DateTime.now();
   var timestampStart = now.millisecondsSinceEpoch ~/ 1000;
   var timestampEnd = 0;
+  var period = getPeriod(now);
   try {
     var data = scannedData.split('/')[1].split('-');
     var classroom = data[0];
     var seat = data[1];
-    var period = getPeriod(now);
-    print(classroom);
     return Entry(
         classroom: classroom,
         seat: seat,
@@ -105,8 +104,6 @@ create table 'entries' (
   $columnEndTime integer not null)
 ''');
     });
-    print('OPEN TEST');
-    return 0;
   }
 
   Future<Entry> insert(Entry entry) async {
@@ -156,4 +153,18 @@ create table 'entries' (
     entry.id = record['_id'];
     return entry;
   }
+}
+
+Map<String, String> parseScannedData(scannedData) {
+  var classroom = '';
+  var seat = '';
+  try {
+    var data = scannedData.split('/')[1].split('-');
+    classroom = data[0];
+    seat = data[1];
+  }
+  catch (e) {
+
+  }
+  return ({'classroom': classroom, 'seat': seat});
 }

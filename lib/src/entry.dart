@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'db.dart';
+import 'qr.dart';
 
 class NewEntryScreen extends StatefulWidget {
   final Entry newEntry;
@@ -11,15 +12,22 @@ class NewEntryScreen extends StatefulWidget {
 
 class _NewEntryScreenState extends State<NewEntryScreen> {
   final _formKey = GlobalKey<FormState>();
-  final Entry newEntry;
+  Entry newEntry;
   _NewEntryScreenState(this.newEntry);
-  final textController = TextEditingController();
-
+  final classroomTextController = TextEditingController();
+  final seatTextController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('New entry'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.camera_alt),
+            tooltip: 'Scan QR code',
+            onPressed: () {_scanQRCode(context);},
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -45,21 +53,21 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                     ),
                   
                   TextFormField(
+                    controller: classroomTextController,
                     onChanged: (text) {
                       newEntry.classroom = text;
                     },
                     textInputAction: TextInputAction.next,
-                    initialValue: newEntry.classroom,
                     decoration: InputDecoration(
                       labelText: 'Classroom',
                     ),
                   ),
                   TextFormField(
+                    controller: seatTextController,
                     onChanged: (text) {
                       newEntry.seat = text;
                     },
                     textInputAction: TextInputAction.next,
-                    initialValue: newEntry.seat,
                     decoration: InputDecoration(
                       labelText: 'Seat',
                     ),
@@ -110,9 +118,23 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     Navigator.pop(context, newEntry);
   }
 
+  _scanQRCode(BuildContext context) async {
+    var scannedData = await Navigator.push(
+      context,
+      // Create the SelectionScreen in the next step.
+      MaterialPageRoute(builder: (context) => QRScanScreen()),
+    );
+    var parsedData = parseScannedData(scannedData);
+
+      classroomTextController.text = parsedData['classroom']!;
+      seatTextController.text = parsedData['seat']!;
+
+  }
+
   @override
   void dispose() {
-    textController.dispose();
+    classroomTextController.dispose();
+    seatTextController.dispose();
     super.dispose();
   }
 }

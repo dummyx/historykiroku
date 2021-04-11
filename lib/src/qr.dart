@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:historykiroku/src/db.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class QRScanScreen extends StatefulWidget {
@@ -112,7 +111,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
       if (result != null) {
         scannedData = result!.code;
       }
-      Navigator.pop(context, generateNewEntry(scannedData));
+      Navigator.pop(context, scannedData);
     });
   }
 

@@ -51,7 +51,11 @@ class _HomeState extends State {
               );
             },
           ),
-          floatingActionButton: Builder(
+          floatingActionButton: Builder (builder: (context) =>FloatingActionButton(
+            child: Icon(Icons.add),
+            onPressed: () {_navigateToNewEntry(context, generateNewEntry(''));} ,
+            ))
+          /*Builder(
               builder: (context) => PopupMenuButton<String>(
                     tooltip: 'Add',
                     child: Icon(Icons.add_circle_outline_outlined),
@@ -68,16 +72,8 @@ class _HomeState extends State {
                     onSelected: (index) {
                       _navigate(index, context);
                     },
-                  ))),
-    );
-  }
-
-  _navigate(String index, BuildContext context) {
-    if (index == 'QRScan') {
-      _scanQRCode(context);
-    } else {
-      _navigateToNewEntry(context, generateNewEntry(''));
-    }
+                  ))),*/
+    ));
   }
 
   _navigateToNewEntry(BuildContext context, Entry newEntry) async {
@@ -85,7 +81,7 @@ class _HomeState extends State {
         context,
         MaterialPageRoute(
             builder: (context) => NewEntryScreen(newEntry: newEntry)));
-    if (returnedEntry!=null) {
+    if (returnedEntry != null) {
       newEntry = returnedEntry;
     }
     await db.insert(newEntry);
@@ -94,19 +90,7 @@ class _HomeState extends State {
       entries = entries;
     });
   }
-
-  _scanQRCode(BuildContext context) async {
-    var newEntry = await Navigator.push(
-      context,
-      // Create the SelectionScreen in the next step.
-      MaterialPageRoute(builder: (context) => QRScanScreen()),
-    );
-    if (newEntry != null) {
-      _navigateToNewEntry(context, newEntry);
-    }
-  }
 }
-
 getData() async {
   List<Entry> entries = await db.getEntries();
   return entries;
