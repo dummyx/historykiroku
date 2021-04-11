@@ -47,7 +47,7 @@ class _HomeState extends State {
             itemBuilder: (context, index) {
               return ListTile(
                 title: Text(
-                    'id:${entries[index].id}  Classroom:${entries[index].classroom}  Seat:${entries[index].seat} Period: ${entries[index].period}'),
+                    'id:${entries[index].id}  Classroom:${entries[index].classroom}  Seat:${entries[index].seat} Period: ${entries[index].period} Time: ${DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart*1000).toString()}'),
               );
             },
           ),
@@ -81,10 +81,13 @@ class _HomeState extends State {
   }
 
   _navigateToNewEntry(BuildContext context, Entry newEntry) async {
-    newEntry = await Navigator.push(
+    var returnedEntry = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => NewEntryScreen(newEntry: newEntry)));
+    if (returnedEntry!=null) {
+      newEntry = returnedEntry;
+    }
     await db.insert(newEntry);
     entries = await db.getEntries();
     setState(() {

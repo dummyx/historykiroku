@@ -34,9 +34,16 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
             child: Column(
               children: [
                 ...[
-                  /*DateTimePicker(
-                      type: DateTimePickerType.dateTime,
-                    ),*/
+                  DateTimePicker(
+                    initialValue: DateTime.fromMillisecondsSinceEpoch(newEntry.timestampStart*1000).toString(),
+                    firstDate: DateTime(2019),
+                    lastDate: DateTime(2100),
+                    type: DateTimePickerType.dateTimeSeparate,
+                    dateLabelText: 'Date',
+                    timeLabelText: 'Time',
+                    onChanged: (datetime) {newEntry.timestampStart = DateTime.parse(datetime).millisecondsSinceEpoch~/1000;},
+                    ),
+                  
                   TextFormField(
                     onChanged: (text) {
                       newEntry.classroom = text;
