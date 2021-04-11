@@ -46,7 +46,7 @@ class _HomeState extends State {
           ),
         ],*/
             ),
-            body: ListView.builder(
+            body: ListView.separated(
               itemCount: entries.length,
               itemBuilder: (context, index) {
                 return ListTile(
@@ -58,6 +58,7 @@ class _HomeState extends State {
                     },
                     trailing: Text('id:${entries[index].id}'));
               },
+              separatorBuilder: (context, index) {return Divider(color: Colors.blue);},
             ),
             floatingActionButton: Builder(
                 builder: (context) => FloatingActionButton(
