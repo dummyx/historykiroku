@@ -1,6 +1,4 @@
 import 'package:sqflite/sqflite.dart';
-import 'dart:io';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 final String tableEntries = 'entries';
@@ -19,9 +17,12 @@ class Entry {
   int timestampStart;
   int timestampEnd;
 
-  Entry({required this.classroom, required this.seat, 
-         required this.period,
-         required this.timestampStart, required this.timestampEnd});
+  Entry(
+      {required this.classroom,
+      required this.seat,
+      required this.period,
+      required this.timestampStart,
+      required this.timestampEnd});
 
   Map<String, Object?> toMap() {
     var map = <String, Object?>{
@@ -38,13 +39,10 @@ class Entry {
   }
 }
 
-
-
-
-Entry generateNewEntry(String scannedData){
+Entry generateNewEntry(String scannedData) {
   //'jp.ac.dendai/%s-%s'%(classroom, seat)
   var now = DateTime.now();
-  var timestampStart = now.millisecondsSinceEpoch~/1000;
+  var timestampStart = now.millisecondsSinceEpoch ~/ 1000;
   var timestampEnd = 0;
   try {
     var data = scannedData.split('/')[1].split('-');
@@ -52,18 +50,23 @@ Entry generateNewEntry(String scannedData){
     var seat = data[1];
     var period = getPeriod(now);
     print(classroom);
-    return Entry(classroom: classroom, seat: seat, 
-                         period: period, 
-                         timestampStart: timestampStart, timestampEnd: timestampEnd);
-  }
-  catch (e) {
-    return Entry(classroom: '', seat: '', 
-                 period: 1, 
-                 timestampStart: timestampStart, timestampEnd: timestampEnd);
+    return Entry(
+        classroom: classroom,
+        seat: seat,
+        period: period,
+        timestampStart: timestampStart,
+        timestampEnd: timestampEnd);
+  } catch (e) {
+    return Entry(
+        classroom: '',
+        seat: '',
+        period: 1,
+        timestampStart: timestampStart,
+        timestampEnd: timestampEnd);
   }
 }
 
-int getPeriod(DateTime time){
+int getPeriod(DateTime time) {
   var period = 1;
   switch (time.hour) {
     case 9:
@@ -85,12 +88,9 @@ int getPeriod(DateTime time){
   return period;
 }
 
-
-
-class DatabaseProvider {  
+class DatabaseProvider {
   late Database dataBase;
 
-    
   Future open() async {
     var path = await localFile();
     this.dataBase = await openDatabase(path, version: 1,
@@ -124,34 +124,36 @@ create table 'entries' (
   }
 
   Future<String> localFile() async {
-  final path = await localPath();
-  return ('$path/db.sqlite');
-}
-Future<String> localPath() async {
+    final path = await localPath();
+    return ('$path/db.sqlite');
+  }
+
+  Future<String> localPath() async {
     final directory = await getApplicationDocumentsDirectory();
 
-  return directory.path;
-}
+    return directory.path;
+  }
 
   Future<int> delete(int id) async {
-    return await dataBase.delete(tableEntries, where: '$columnId = ?', whereArgs: [id]);
+    return await dataBase
+        .delete(tableEntries, where: '$columnId = ?', whereArgs: [id]);
   }
+
   Future<int> update(Entry entry) async {
     return await dataBase.update(tableEntries, entry.toMap(),
         where: '$columnId = ?', whereArgs: [entry.id]);
-    
   }
 
   Future close() async => dataBase.close();
 
   getEntryFromRecord(Map record) {
-    var entry = Entry(classroom: record[columnClassroom],
-                  seat: record[columnSeat],
-                  period: record[columnPeriod],
-                  timestampStart: record[columnStartTime],
-                  timestampEnd: record[columnEndTime]);
+    var entry = Entry(
+        classroom: record[columnClassroom],
+        seat: record[columnSeat],
+        period: record[columnPeriod],
+        timestampStart: record[columnStartTime],
+        timestampEnd: record[columnEndTime]);
     entry.id = record['_id'];
     return entry;
   }
-
 }
