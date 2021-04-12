@@ -34,11 +34,11 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? 'Edit entry' : 'New entry'),
+        title: Text(isEdit ? '編集' : '作成'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.camera_alt),
-            tooltip: 'Scan QR code',
+            tooltip: 'スキャン',
             onPressed: () {
               _scanQRCode(context);
             },
@@ -58,6 +58,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
             child: Column(
               children: [
                 ...[
+                  Text('着席時間'),
                   DateTimePicker(
                     initialValue: DateTime.fromMillisecondsSinceEpoch(
                             newEntry.timestampStart * 1000)
@@ -80,7 +81,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                     },
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: 'Classroom',
+                      labelText: '教室',
                     ),
                   ),
                   TextFormField(
@@ -90,11 +91,11 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                     },
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: 'Seat',
+                      labelText: '座席',
                     ),
                   ),
                   Row(children: [
-                    Text('Period:'),
+                    Text('時限:'),
                     DropdownButton<String>(
                       value: newEntry.period.toString(),
                       icon: Icon(Icons.arrow_downward),
@@ -127,6 +128,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                     )
                   ],
                 ),
+                Text('離席時間'),
                 DateTimePicker(
                   initialValue: DateTime.fromMillisecondsSinceEpoch(
                           newEntry.timestampEnd * 1000)
