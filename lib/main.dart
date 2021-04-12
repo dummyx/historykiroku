@@ -46,19 +46,59 @@ class _HomeState extends State {
           ),
         ],*/
             ),
-            body: ListView.separated(
+            body: ListView.builder(
               itemCount: entries.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                    title: Text('${entries[index].classroom}-${entries[index].seat} Period: ${entries[index].period}\n' +
-                        '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' +
-                        '${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}'),
-                    onTap: () {
-                      _navigateToEditEntry(context, entries[index]);
-                    },
-                    trailing: Text('id:${entries[index].id}'));
+                return Container(
+                    padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    width: double.maxFinite,
+                    child: Center(
+                      child: Card(
+                        elevation: 5,
+                        child: Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                    width: 2.0, color: Colors.blue.shade400),
+                              ),
+                              color: Colors.white,
+                            ),
+
+                            ///////////
+                            child: InkWell(
+                              splashColor: Colors.blue.withAlpha(30),
+                              onLongPress: () {
+                                _navigateToEditEntry(context, entries[index]);
+                              },
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  ListTile(
+                                    leading: Icon(Icons.ballot_rounded),
+                                    title: Text(
+                                        'Class: ${entries[index].classroom} | Seat: ${entries[index].seat} | Period: ${entries[index].period}'),
+                                    subtitle: Text(
+                                        '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}'),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: <Widget>[
+                                      TextButton(
+                                        child: const Text('EDIT'),
+                                        onPressed: () {
+                                          _navigateToEditEntry(
+                                              context, entries[index]);
+                                        },
+                                      ),
+                                      const SizedBox(width: 10),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            )),
+                      ),
+                    ));
               },
-              separatorBuilder: (context, index) {return Divider(color: Colors.blue);},
             ),
             floatingActionButton: Builder(
                 builder: (context) => FloatingActionButton(
