@@ -25,7 +25,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     super.initState();
     classroomTextController.text = newEntry.classroom;
     seatTextController.text = newEntry.seat;
-    if (isEdit) {
+    if (isEdit&&newEntry.timestampEnd==0) {
       newEntry.timestampEnd = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     }
   }
