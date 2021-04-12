@@ -62,14 +62,19 @@ class _HomeState extends State {
                             decoration: BoxDecoration(
                               border: Border(
                                 top: BorderSide(
-                                    width: 2.0, color: entries[index].timestampEnd==0? Colors.red.shade400:Colors.blue.shade400),
+                                    width: 2.0,
+                                    color: entries[index].timestampEnd == 0
+                                        ? Colors.red.shade400
+                                        : Colors.blue.shade400),
                               ),
                             ),
                             child: InkWell(
                               splashColor: Colors.blue.withAlpha(30),
                               onLongPress: () {
-                                if (entries[index].timestampEnd==0) {
-                                  entries[index].timestampEnd = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+                                if (entries[index].timestampEnd == 0) {
+                                  entries[index].timestampEnd =
+                                      DateTime.now().millisecondsSinceEpoch ~/
+                                          1000;
                                   db.update(entries[index]);
                                   setState(() {
                                     entries[index] = entries[index];
@@ -85,9 +90,10 @@ class _HomeState extends State {
                                     title: Text(
                                         '教室: ${entries[index].classroom} | 座席: ${entries[index].seat} | 時限: ${entries[index].period}'),
                                     subtitle: Text(
-                                        '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' + 
-                                        (entries[index].timestampEnd == 0? '':
-                                        '${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}')),
+                                        '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' +
+                                            (entries[index].timestampEnd == 0
+                                                ? ''
+                                                : '${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}')),
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
@@ -128,12 +134,12 @@ class _HomeState extends State {
                 )));
     if (returnedEntry != null) {
       entry = returnedEntry;
+      await db.update(entry);
+      entries = await db.getEntries();
+      setState(() {
+        entries = entries;
+      });
     }
-    await db.update(entry);
-    entries = await db.getEntries();
-    setState(() {
-      entries = entries;
-    });
   }
 
   _navigateToNewEntry(BuildContext context, Entry newEntry) async {
@@ -146,12 +152,12 @@ class _HomeState extends State {
                 )));
     if (returnedEntry != null) {
       newEntry = returnedEntry;
+      await db.insert(newEntry);
+      entries = await db.getEntries();
+      setState(() {
+        entries = entries;
+      });
     }
-    await db.insert(newEntry);
-    entries = await db.getEntries();
-    setState(() {
-      entries = entries;
-    });
   }
 }
 
