@@ -26,10 +26,13 @@ class Home extends StatefulWidget {
 class _HomeState extends State {
   List<Entry> entries;
   _HomeState(this.entries);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        theme: ThemeData(
+          brightness: Brightness.light,
+        ),
+        darkTheme: ThemeData(brightness: Brightness.dark),
         home: Scaffold(
             appBar: AppBar(
               /*leading: IconButton(
@@ -59,16 +62,20 @@ class _HomeState extends State {
                             decoration: BoxDecoration(
                               border: Border(
                                 top: BorderSide(
-                                    width: 2.0, color: Colors.blue.shade400),
+                                    width: 2.0, color: entries[index].timestampEnd==0? Colors.red.shade400:Colors.blue.shade400),
                               ),
-                              color: Colors.white,
                             ),
-
-                            ///////////
                             child: InkWell(
                               splashColor: Colors.blue.withAlpha(30),
                               onLongPress: () {
-                                _navigateToEditEntry(context, entries[index]);
+                                if (entries[index].timestampEnd==0) {
+                                  entries[index].timestampEnd = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+                                  db.update(entries[index]);
+                                  setState(() {
+                                    entries[index] = entries[index];
+                                  });
+                                }
+                                //_navigateToEditEntry(context, entries[index]);
                               },
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -76,9 +83,11 @@ class _HomeState extends State {
                                   ListTile(
                                     leading: Icon(Icons.ballot_rounded),
                                     title: Text(
-                                        'Class: ${entries[index].classroom} | Seat: ${entries[index].seat} | Period: ${entries[index].period}'),
+                                        '教室: ${entries[index].classroom} | 座席: ${entries[index].seat} | 時限: ${entries[index].period}'),
                                     subtitle: Text(
-                                        '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}'),
+                                        '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' + 
+                                        (entries[index].timestampEnd == 0? '':
+                                        '${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}')),
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
