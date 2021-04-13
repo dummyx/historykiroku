@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class QRScanScreen extends StatefulWidget {
@@ -10,7 +9,7 @@ class QRScanScreen extends StatefulWidget {
 class _QRScanScreenState extends State<QRScanScreen> {
   Barcode? result;
   QRViewController? controller;
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  final GlobalKey qrKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +24,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  if (result != null)
-                    Text(
-                        'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                  else
-                    Text('Scan a code'),
+                  if (result == null) Text('スキャン'),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -44,7 +39,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
                             child: FutureBuilder(
                               future: controller?.getFlashStatus(),
                               builder: (context, snapshot) {
-                                return Text('フラッシュ: ${snapshot.data}');
+                                return Text('フラッシュ');
                               },
                             )),
                       ),
@@ -59,8 +54,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
                               future: controller?.getCameraInfo(),
                               builder: (context, snapshot) {
                                 if (snapshot.data != null) {
-                                  return Text(
-                                      'カメラ向き ${describeEnum(snapshot.data!)}');
+                                  return Text('カメラ向き');
                                 } else {
                                   return Text('ローディング');
                                 }

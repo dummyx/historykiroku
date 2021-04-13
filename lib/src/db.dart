@@ -7,6 +7,7 @@ final String columnClassroom = 'classroom';
 final String columnSeat = 'seat';
 final String columnStartTime = 'start';
 final String columnEndTime = 'end';
+final String columnLabel = 'label';
 
 class Entry {
   int? id;
@@ -14,19 +15,22 @@ class Entry {
   String seat;
   int timestampStart;
   int timestampEnd;
+  String label;
 
   Entry(
       {required this.classroom,
       required this.seat,
       required this.timestampStart,
-      required this.timestampEnd});
+      required this.timestampEnd,
+      required this.label});
 
   Map<String, Object?> toMap() {
     var map = <String, Object?>{
       columnClassroom: classroom,
       columnSeat: seat,
       columnStartTime: timestampStart,
-      columnEndTime: timestampEnd
+      columnEndTime: timestampEnd,
+      columnLabel: label
     };
     if (id != null) {
       map[columnId] = id;
@@ -48,13 +52,15 @@ Entry generateNewEntry(String scannedData) {
         classroom: classroom,
         seat: seat,
         timestampStart: timestampStart,
-        timestampEnd: timestampEnd);
+        timestampEnd: timestampEnd,
+        label: '');
   } catch (e) {
     return Entry(
         classroom: '',
         seat: '',
         timestampStart: timestampStart,
-        timestampEnd: timestampEnd);
+        timestampEnd: timestampEnd,
+        label: '');
   }
 }
 
@@ -71,7 +77,8 @@ create table 'entries' (
   $columnClassroom text not null,
   $columnSeat text not null,
   $columnStartTime integer not null,
-  $columnEndTime integer not null)
+  $columnEndTime integer not null,
+  $columnLabel text not null)
 ''');
     });
   }
@@ -118,7 +125,8 @@ create table 'entries' (
         classroom: record[columnClassroom],
         seat: record[columnSeat],
         timestampStart: record[columnStartTime],
-        timestampEnd: record[columnEndTime]);
+        timestampEnd: record[columnEndTime],
+        label: record[columnLabel]);
     entry.id = record['_id'];
     return entry;
   }

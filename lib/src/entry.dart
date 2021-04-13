@@ -18,18 +18,23 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
   _NewEntryScreenState(this.entry);
   final classroomTextController = TextEditingController();
   final seatTextController = TextEditingController();
+  final labelTextController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     classroomTextController.text = entry.classroom;
     seatTextController.text = entry.seat;
+    labelTextController.text = entry.label;
 
     classroomTextController.addListener(() {
       entry.classroom = classroomTextController.text;
     });
     seatTextController.addListener(() {
       entry.seat = seatTextController.text;
+    });
+    labelTextController.addListener(() {
+      entry.label = labelTextController.text;
     });
   }
 
@@ -106,7 +111,14 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                             DateTime.parse(datetime).millisecondsSinceEpoch ~/
                                 1000;
                       },
-                    )
+                    ),
+                    TextFormField(
+                      controller: labelTextController,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        labelText: 'ラベル',
+                      ),
+                    ),
                   ]
                 ],
               ),
@@ -128,6 +140,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
 
     classroomTextController.text = parsedData['classroom']!;
     seatTextController.text = parsedData['seat']!;
+
     entry.classroom = parsedData['classroom']!;
     entry.seat = parsedData['classroom']!;
   }
@@ -136,6 +149,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
   void dispose() {
     classroomTextController.dispose();
     seatTextController.dispose();
+    labelTextController.dispose();
     super.dispose();
   }
 }

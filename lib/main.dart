@@ -126,8 +126,7 @@ class _HomeState extends State {
                                             barrierDismissible: false,
                                             builder: (BuildContext context) {
                                               return AlertDialog(
-                                                title:
-                                                    Text('削除しますか'),
+                                                title: Text('削除しますか'),
                                                 content: SingleChildScrollView(
                                                   child: ListBody(
                                                     children: <Widget>[
