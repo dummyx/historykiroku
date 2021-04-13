@@ -44,7 +44,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
                             child: FutureBuilder(
                               future: controller?.getFlashStatus(),
                               builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data}');
+                                return Text('フラッシュ: ${snapshot.data}');
                               },
                             )),
                       ),
@@ -60,9 +60,9 @@ class _QRScanScreenState extends State<QRScanScreen> {
                               builder: (context, snapshot) {
                                 if (snapshot.data != null) {
                                   return Text(
-                                      'Camera facing ${describeEnum(snapshot.data!)}');
+                                      'カメラ向き ${describeEnum(snapshot.data!)}');
                                 } else {
-                                  return Text('loading');
+                                  return Text('ローディング');
                                 }
                               },
                             )),

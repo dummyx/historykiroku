@@ -34,12 +34,25 @@ class _HomeState extends State {
         ),
         darkTheme: ThemeData(brightness: Brightness.dark),
         home: Scaffold(
+            drawer: Container(
+                width: 50,
+                child: Drawer(
+                  child: ListView(padding: EdgeInsets.zero, children: <Widget>[
+                    DrawerHeader(
+                      child: Text('メニュー'),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                      ),
+                    ),
+                    ListTile(title: Text(''), onTap: () {}),
+                  ]),
+                )),
             appBar: AppBar(
               /*leading: IconButton(
-          icon: Icon(Icons.menu),
-          tooltip: 'Navigation menu',
-          onPressed: null,
-        ),*/
+                icon: Icon(Icons.menu),
+                tooltip: 'メニュー',
+                onPressed: null,
+              ),*/
               title: Text("HistoryKiroku"),
               /*actions: <Widget>[
           IconButton(
@@ -88,7 +101,7 @@ class _HomeState extends State {
                                   ListTile(
                                     leading: Icon(Icons.ballot_rounded),
                                     title: Text(
-                                        '教室: ${entries[index].classroom} | 座席: ${entries[index].seat} | 時限: ${entries[index].period}'),
+                                        '教室: ${entries[index].classroom} | 座席: ${entries[index].seat}'),
                                     subtitle: Text(
                                         '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' +
                                             (entries[index].timestampEnd == 0
@@ -99,7 +112,7 @@ class _HomeState extends State {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: <Widget>[
                                       TextButton(
-                                        child: const Text('EDIT'),
+                                        child: const Text('編集'),
                                         onPressed: () {
                                           _navigateToEditEntry(
                                               context, entries[index]);
@@ -119,7 +132,7 @@ class _HomeState extends State {
                 builder: (context) => FloatingActionButton(
                       child: Icon(Icons.add),
                       onPressed: () {
-                        _navigateToNewEntry(context, generateNewEntry(''));
+                        _navigateToEditEntry(context, generateNewEntry(''));
                       },
                     ))));
   }
@@ -129,30 +142,15 @@ class _HomeState extends State {
         context,
         MaterialPageRoute(
             builder: (context) => NewEntryScreen(
-                  newEntry: entry,
-                  isEdit: true,
+                  entry: entry,
                 )));
     if (returnedEntry != null) {
       entry = returnedEntry;
-      await db.update(entry);
-      entries = await db.getEntries();
-      setState(() {
-        entries = entries;
-      });
-    }
-  }
-
-  _navigateToNewEntry(BuildContext context, Entry newEntry) async {
-    var returnedEntry = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => NewEntryScreen(
-                  newEntry: newEntry,
-                  isEdit: false,
-                )));
-    if (returnedEntry != null) {
-      newEntry = returnedEntry;
-      await db.insert(newEntry);
+      if (entry.id != null) {
+        await db.update(entry);
+      } else {
+        await db.insert(entry);
+      }
       entries = await db.getEntries();
       setState(() {
         entries = entries;

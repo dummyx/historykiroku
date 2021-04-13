@@ -5,7 +5,6 @@ final String tableEntries = 'entries';
 final String columnId = '_id';
 final String columnClassroom = 'classroom';
 final String columnSeat = 'seat';
-final String columnPeriod = 'period';
 final String columnStartTime = 'start';
 final String columnEndTime = 'end';
 
@@ -13,14 +12,12 @@ class Entry {
   int? id;
   String classroom;
   String seat;
-  int period;
   int timestampStart;
   int timestampEnd;
 
   Entry(
       {required this.classroom,
       required this.seat,
-      required this.period,
       required this.timestampStart,
       required this.timestampEnd});
 
@@ -28,7 +25,6 @@ class Entry {
     var map = <String, Object?>{
       columnClassroom: classroom,
       columnSeat: seat,
-      columnPeriod: period,
       columnStartTime: timestampStart,
       columnEndTime: timestampEnd
     };
@@ -44,7 +40,6 @@ Entry generateNewEntry(String scannedData) {
   var now = DateTime.now();
   var timestampStart = now.millisecondsSinceEpoch ~/ 1000;
   var timestampEnd = 0;
-  var period = getPeriod(now);
   try {
     var data = scannedData.split('/')[1].split('-');
     var classroom = data[0];
@@ -52,39 +47,15 @@ Entry generateNewEntry(String scannedData) {
     return Entry(
         classroom: classroom,
         seat: seat,
-        period: period,
         timestampStart: timestampStart,
         timestampEnd: timestampEnd);
   } catch (e) {
     return Entry(
         classroom: '',
         seat: '',
-        period: 1,
         timestampStart: timestampStart,
         timestampEnd: timestampEnd);
   }
-}
-
-int getPeriod(DateTime time) {
-  var period = 1;
-  switch (time.hour) {
-    case 9:
-      period = 1;
-      break;
-    case 11:
-      period = 2;
-      break;
-    case 13:
-      period = 3;
-      break;
-    case 15:
-      period = 4;
-      break;
-    case 17:
-      period = 5;
-      break;
-  }
-  return period;
 }
 
 class DatabaseProvider {
@@ -99,7 +70,6 @@ create table 'entries' (
   $columnId integer primary key autoincrement, 
   $columnClassroom text not null,
   $columnSeat text not null,
-  $columnPeriod integer not null,
   $columnStartTime integer not null,
   $columnEndTime integer not null)
 ''');
@@ -147,7 +117,6 @@ create table 'entries' (
     var entry = Entry(
         classroom: record[columnClassroom],
         seat: record[columnSeat],
-        period: record[columnPeriod],
         timestampStart: record[columnStartTime],
         timestampEnd: record[columnEndTime]);
     entry.id = record['_id'];
