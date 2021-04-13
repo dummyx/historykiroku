@@ -3,10 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'src/db.dart';
 import 'src/entry.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 var db = DatabaseProvider();
 final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
 final DateFormat hourminuteFormatter = DateFormat('HH:mm');
+final DateFormat exportFormatter = DateFormat('yyyy/MM/dd,HH:mm:ss');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,19 +36,6 @@ class _HomeState extends State {
         ),
         darkTheme: ThemeData(brightness: Brightness.dark),
         home: Scaffold(
-            drawer: Container(
-                width: 50,
-                child: Drawer(
-                  child: ListView(padding: EdgeInsets.zero, children: <Widget>[
-                    DrawerHeader(
-                      child: Text('メニュー'),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                      ),
-                    ),
-                    ListTile(title: Text(''), onTap: () {}),
-                  ]),
-                )),
             appBar: AppBar(
               /*leading: IconButton(
                 icon: Icon(Icons.menu),
@@ -54,13 +43,28 @@ class _HomeState extends State {
                 onPressed: null,
               ),*/
               title: Text("HistoryKiroku"),
-              /*actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.search),
-            tooltip: 'Search',
-            onPressed: null,
-          ),
-        ],*/
+              actions: <Widget>[
+                Builder(
+                  builder: (context) => PopupMenuButton<String>(
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuItem<String>>[
+                      PopupMenuItem<String>(
+                        value: 'Copy14Days',
+                        child: Text('14日以内をコピー'),
+                      ),
+                    ],
+                    onSelected: (index) {
+                      if (index == 'Copy14Days') {
+                        _copyToClipboard(_get14Days());
+                        final snackBar = SnackBar(
+                          content: Text('コピー完了'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
+                    },
+                  ),
+                )
+              ],
             ),
             body: ListView.builder(
               itemCount: entries.length,
@@ -156,6 +160,26 @@ class _HomeState extends State {
         entries = entries;
       });
     }
+  }
+
+  _get14Days() {
+    var result = '';
+    var nowUNIXEpoch = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    for (Entry e in entries) {
+      if (e.timestampStart <= nowUNIXEpoch) {
+        var time = DateTime.fromMillisecondsSinceEpoch(e.timestampStart * 1000);
+        var timeString = exportFormatter.format(time);
+        print(timeString);
+        print(entries.length);
+        result +=
+            '\"\",$timeString,\"jp.ac.dendai/${e.classroom}-${e.seat}\"\n';
+      }
+    }
+    return result;
+  }
+
+  void _copyToClipboard(String result) {
+    Clipboard.setData(new ClipboardData(text: result));
   }
 }
 
