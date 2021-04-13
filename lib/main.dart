@@ -116,6 +116,65 @@ class _HomeState extends State {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: <Widget>[
                                       TextButton(
+                                        style: TextButton.styleFrom(
+                                          primary: Colors.red,
+                                        ),
+                                        child: const Text('削除'),
+                                        onPressed: () {
+                                          showDialog<void>(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title:
+                                                    Text('削除しますか'),
+                                                content: SingleChildScrollView(
+                                                  child: ListBody(
+                                                    children: <Widget>[
+                                                      Text(
+                                                          'レコードをリカバリーするはできません'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    style: TextButton.styleFrom(
+                                                      primary: Colors.red,
+                                                    ),
+                                                    child: Text('はい'),
+                                                    onPressed: () {
+                                                      if (entries[index].id !=
+                                                          null) {
+                                                        _deleteEntry(
+                                                            entries[index].id);
+                                                        Navigator.of(context,
+                                                                rootNavigator:
+                                                                    true)
+                                                            .pop();
+                                                      }
+                                                    },
+                                                  ),
+                                                  TextButton(
+                                                    style: TextButton.styleFrom(
+                                                      primary: Colors.blue,
+                                                    ),
+                                                    child: Text('いえ'),
+                                                    onPressed: () {
+                                                      Navigator.of(context,
+                                                              rootNavigator:
+                                                                  true)
+                                                          .pop();
+                                                    },
+                                                  )
+                                                ],
+                                              );
+                                            },
+                                          );
+                                          //_showMyDialog(entries[index].id);
+                                        },
+                                      ),
+                                      const SizedBox(width: 10),
+                                      TextButton(
                                         child: const Text('編集'),
                                         onPressed: () {
                                           _navigateToEditEntry(
@@ -160,6 +219,16 @@ class _HomeState extends State {
         entries = entries;
       });
     }
+  }
+
+  _deleteEntry(int? id) async {
+    if (id != null) {
+      db.delete(id);
+    }
+    entries = await db.getEntries();
+    setState(() {
+      entries = entries;
+    });
   }
 
   _get14Days() {
