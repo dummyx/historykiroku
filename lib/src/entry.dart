@@ -142,7 +142,7 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
     seatTextController.text = parsedData['seat']!;
 
     entry.classroom = parsedData['classroom']!;
-    entry.seat = parsedData['classroom']!;
+    entry.seat = parsedData['seat']!;
   }
 
   @override
