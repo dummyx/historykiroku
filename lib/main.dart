@@ -75,7 +75,7 @@ class _HomeState extends State {
                       padding: EdgeInsets.all(16.0),
                       child: Align(
                         alignment: Alignment.centerLeft,
-                        child: Text("削除"),
+                        child: Text('削除'),
                       ),
                     ),
                     key: Key(entries[index].id.toString()),
@@ -128,8 +128,8 @@ class _HomeState extends State {
                       });
 
                       // show snackBar message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Record deleted")));
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text('削除完了')));
                     },
                     child: Container(
                         padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
@@ -182,7 +182,7 @@ class _HomeState extends State {
                                             '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' +
                                                 (entries[index].timestampEnd ==
                                                         0
-                                                    ? 'Ongoing'
+                                                    ? '進行中'
                                                     : '${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}')),
                                       ),
                                       Row(
