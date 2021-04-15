@@ -57,7 +57,7 @@ class _HomeState extends State {
                       if (index == 'Copy14Days') {
                         _copyToClipboard(_get14Days());
                         final snackBar = SnackBar(
-                          content: Text('コピー完了'),
+                          content: Text('コピー完了'), // Copy completed
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
@@ -69,125 +69,150 @@ class _HomeState extends State {
             body: ListView.builder(
               itemCount: entries.length,
               itemBuilder: (context, index) {
-                return Container(
-                    padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                    width: double.maxFinite,
-                    child: Center(
-                      child: Card(
-                        elevation: 5,
-                        child: Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                top: BorderSide(
-                                    width: 2.0,
-                                    color: entries[index].timestampEnd == 0
-                                        ? Colors.red.shade400
-                                        : Colors.blue.shade400),
-                              ),
-                            ),
-                            child: InkWell(
-                              splashColor: Colors.blue.withAlpha(30),
-                              onLongPress: () {
-                                if (entries[index].timestampEnd == 0) {
-                                  entries[index].timestampEnd =
-                                      DateTime.now().millisecondsSinceEpoch ~/
-                                          1000;
-                                  db.update(entries[index]);
-                                  setState(() {
-                                    entries[index] = entries[index];
-                                  });
-                                }
-                                //_navigateToEditEntry(context, entries[index]);
-                              },
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                return Dismissible(
+                    background: Container(
+                      color: Colors.red,
+                      padding: EdgeInsets.all(16.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text("削除"),
+                      ),
+                    ),
+                    key: Key(entries[index].id.toString()),
+                    // confirmation alert dialog before actually deleting
+                    confirmDismiss: (DismissDirection direction) async {
+                      return await showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('削除しますか'),
+                            content: SingleChildScrollView(
+                              child: ListBody(
                                 children: <Widget>[
-                                  ListTile(
-                                    leading: Icon(Icons.ballot_rounded),
-                                    title: Text(
-                                        '教室: ${entries[index].classroom} | 座席: ${entries[index].seat}'),
-                                    subtitle: Text(
-                                        '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' +
-                                            (entries[index].timestampEnd == 0
-                                                ? ''
-                                                : '${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}')),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: <Widget>[
-                                      TextButton(
-                                        style: TextButton.styleFrom(
-                                          primary: Colors.red,
-                                        ),
-                                        child: const Text('削除'),
-                                        onPressed: () {
-                                          showDialog<void>(
-                                            context: context,
-                                            barrierDismissible: false,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: Text('削除しますか'),
-                                                content: SingleChildScrollView(
-                                                  child: ListBody(
-                                                    children: <Widget>[
-                                                      Text(
-                                                          'レコードをリカバリーするはできません'),
-                                                    ],
-                                                  ),
-                                                ),
-                                                actions: <Widget>[
-                                                  TextButton(
-                                                    style: TextButton.styleFrom(
-                                                      primary: Colors.red,
-                                                    ),
-                                                    child: Text('はい'),
-                                                    onPressed: () {
-                                                      if (entries[index].id !=
-                                                          null) {
-                                                        _deleteEntry(
-                                                            entries[index].id);
-                                                        Navigator.of(context,
-                                                                rootNavigator:
-                                                                    true)
-                                                            .pop();
-                                                      }
-                                                    },
-                                                  ),
-                                                  TextButton(
-                                                    style: TextButton.styleFrom(
-                                                      primary: Colors.blue,
-                                                    ),
-                                                    child: Text('いえ'),
-                                                    onPressed: () {
-                                                      Navigator.of(context,
-                                                              rootNavigator:
-                                                                  true)
-                                                          .pop();
-                                                    },
-                                                  )
-                                                ],
-                                              );
-                                            },
-                                          );
-                                          //_showMyDialog(entries[index].id);
-                                        },
-                                      ),
-                                      const SizedBox(width: 10),
-                                      TextButton(
-                                        child: const Text('編集'),
-                                        onPressed: () {
-                                          _navigateToEditEntry(
-                                              context, entries[index]);
-                                        },
-                                      ),
-                                      const SizedBox(width: 10),
-                                    ],
-                                  ),
+                                  Text(
+                                      'レコードをリカバリーするはできません'), // 'Records cannot be recovered'
                                 ],
                               ),
-                            )),
-                      ),
-                    ));
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  primary: Colors.red,
+                                ),
+                                child: Text('はい'), // 'Confirm
+                                onPressed: () =>
+                                    Navigator.of(context).pop(true),
+                              ),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  primary: Colors.blue,
+                                ),
+                                child: Text('いえ'), // 'cancel'
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                              )
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    // after dismissal confirmation
+                    onDismissed: (direction) {
+                      // delete the entry
+                      setState(() {
+                        if (entries[index].id != null) {
+                          _deleteEntry(entries[index].id);
+                          entries.removeAt(index);
+                        }
+                      });
+
+                      // show snackBar message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Record deleted")));
+                    },
+                    child: Container(
+                        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                        width: double.maxFinite,
+                        child: Center(
+                          child: Card(
+                            elevation: 5,
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(
+                                        width: 2.0,
+                                        color: entries[index].timestampEnd == 0
+                                            ? Colors.blue.shade400
+                                            : Colors.blueGrey.shade400),
+                                  ),
+                                ),
+                                child: InkWell(
+                                  splashColor: Colors.blue.withAlpha(30),
+                                  onLongPress: () {
+                                    if (entries[index].timestampEnd == 0) {
+                                      entries[index].timestampEnd =
+                                          DateTime.now()
+                                                  .millisecondsSinceEpoch ~/
+                                              1000;
+                                      db.update(entries[index]);
+                                      setState(() {
+                                        entries[index] = entries[index];
+                                      });
+                                    }
+                                    //_navigateToEditEntry(context, entries[index]);
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      ListTile(
+                                        leading: entries[index].timestampEnd ==
+                                                0
+                                            ? Icon(
+                                                Icons.access_time_sharp,
+                                                color: Colors.blue.shade400,
+                                              )
+                                            : Icon(
+                                                Icons.ballot_rounded,
+                                                color: Colors.blueGrey.shade400,
+                                              ),
+                                        title: Text(
+                                            '教室: ${entries[index].classroom} | 座席: ${entries[index].seat}'),
+                                        subtitle: Text(
+                                            '${formatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampStart * 1000))} ~ ' +
+                                                (entries[index].timestampEnd ==
+                                                        0
+                                                    ? 'Ongoing'
+                                                    : '${hourminuteFormatter.format(DateTime.fromMillisecondsSinceEpoch(entries[index].timestampEnd * 1000))}')),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: <Widget>[
+                                          TextButton(
+                                            style: TextButton.styleFrom(
+                                              primary: entries[index]
+                                                          .timestampEnd ==
+                                                      0
+                                                  ? Colors.blue.shade400
+                                                  : Colors.blueGrey.shade400,
+                                            ),
+                                            child: const Text(
+                                              '編集',
+                                            ),
+                                            onPressed: () {
+                                              _navigateToEditEntry(
+                                                  context, entries[index]);
+                                            },
+                                          ),
+                                          const SizedBox(width: 10),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                          ),
+                        )));
               },
             ),
             floatingActionButton: Builder(

@@ -66,7 +66,9 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
               child: Column(
                 children: [
                   ...[
-                    Text('着席時間'),
+                    Container(
+                        margin: const EdgeInsets.only(top: 5.0),
+                        child: Text('着席時間')),
                     DateTimePicker(
                       initialValue: DateTime.fromMillisecondsSinceEpoch(
                               entry.timestampStart * 1000)
@@ -96,7 +98,9 @@ class _NewEntryScreenState extends State<NewEntryScreen> {
                         labelText: '座席',
                       ),
                     ),
-                    Text('離席時間'),
+                    Container(
+                        margin: const EdgeInsets.only(top: 30.0),
+                        child: Text('離席時間')),
                     DateTimePicker(
                       initialValue: DateTime.fromMillisecondsSinceEpoch(
                               entry.timestampEnd * 1000)
