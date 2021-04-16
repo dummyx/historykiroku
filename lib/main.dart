@@ -70,6 +70,7 @@ class _HomeState extends State {
               itemCount: entries.length,
               itemBuilder: (context, index) {
                 return Dismissible(
+                    direction: DismissDirection.startToEnd,
                     background: Container(
                       color: Colors.red,
                       padding: EdgeInsets.all(16.0),
