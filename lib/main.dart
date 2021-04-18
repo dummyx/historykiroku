@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
+
+import 'package:intl/intl.dart';
+
 import 'src/db.dart';
 import 'src/entry.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter/services.dart';
 
 var db = DatabaseProvider();
 final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
@@ -27,7 +30,36 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State {
   List<Entry> entries;
+  final _hideButtonController = ScrollController();
+  var _isVisible = true;
+
+  @override
+  initState() {
+    super.initState();
+    _isVisible = true;
+    _hideButtonController.addListener(() {
+      if (_hideButtonController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        if (_isVisible == true) {
+          setState(() {
+            _isVisible = false;
+          });
+        }
+      } else {
+        if (_hideButtonController.position.userScrollDirection ==
+            ScrollDirection.forward) {
+          if (_isVisible == false) {
+            setState(() {
+              _isVisible = true;
+            });
+          }
+        }
+      }
+    });
+  }
+
   _HomeState(this.entries);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -67,6 +99,7 @@ class _HomeState extends State {
               ],
             ),
             body: ListView.builder(
+              controller: _hideButtonController,
               itemCount: entries.length,
               itemBuilder: (context, index) {
                 return Dismissible(
@@ -217,12 +250,15 @@ class _HomeState extends State {
               },
             ),
             floatingActionButton: Builder(
-                builder: (context) => FloatingActionButton(
+                builder: (context) => AnimatedOpacity(
+                    duration: Duration(milliseconds: 300),
+                    opacity: _isVisible ? 1 : 0,
+                    child: FloatingActionButton(
                       child: Icon(Icons.add),
                       onPressed: () {
                         _navigateToEditEntry(context, generateNewEntry(''));
                       },
-                    ))));
+                    )))));
   }
 
   _navigateToEditEntry(BuildContext context, Entry entry) async {
@@ -263,8 +299,6 @@ class _HomeState extends State {
       if (e.timestampStart <= nowUNIXEpoch) {
         var time = DateTime.fromMillisecondsSinceEpoch(e.timestampStart * 1000);
         var timeString = exportFormatter.format(time);
-        print(timeString);
-        print(entries.length);
         result +=
             '\"\",$timeString,\"jp.ac.dendai/${e.classroom}-${e.seat}\"\n';
       }
