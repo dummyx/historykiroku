@@ -97,6 +97,19 @@ create table 'entries' (
     return entries.reversed.toList();
   }
 
+  Future<List<Entry>> searchEntries(String s) async{
+    List<Entry> entries = [];
+    var q = '''
+    SELECT * FROM $tableEntries WHERE $columnClassroom LIKE '%$s%' or $columnSeat LIKE '%$s%'
+    ''';
+    List<Map<String, Object?>> records = await dataBase.rawQuery(q);
+    print(records);
+    for (var record in records) {
+      entries.add(getEntryFromRecord(record));
+    }
+    return entries;
+  }
+
   Future<String> localFile() async {
     final path = await localPath();
     return ('$path/db.sqlite');

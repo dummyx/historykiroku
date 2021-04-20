@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'src/db.dart';
 import 'src/entry.dart';
+import 'src/search.dart';
 
 var db = DatabaseProvider();
 final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
@@ -48,11 +49,9 @@ class _HomeState extends State {
       } else {
         if (_hideButtonController.position.userScrollDirection ==
             ScrollDirection.forward) {
-          if (_isVisible == false) {
-            setState(() {
-              _isVisible = true;
-            });
-          }
+          setState(() {
+            _isVisible = true;
+          });
         }
       }
     });
@@ -84,6 +83,10 @@ class _HomeState extends State {
                         value: 'Copy14Days',
                         child: Text('14日以内をコピー'),
                       ),
+                      PopupMenuItem<String>(
+                        value: 'Search',
+                        child: Text('検索'),
+                      ),
                     ],
                     onSelected: (index) {
                       if (index == 'Copy14Days') {
@@ -92,6 +95,11 @@ class _HomeState extends State {
                           content: Text('コピー完了'), // Copy completed
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      } else if (index == 'Search') {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SearchScreen(db: db,)));
                       }
                     },
                   ),
