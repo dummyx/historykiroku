@@ -1,4 +1,5 @@
 # historykiroku
+[<img height=80 alt="Logo" src="https://github.com/dummyx/historykiroku/raw/main/assets/icon/HistoryKiroku.png" />](https://github.com/dummyx/historykiroku/raw/main/assets/icon/HistoryKiroku.png)
 
 ## Download:
 
